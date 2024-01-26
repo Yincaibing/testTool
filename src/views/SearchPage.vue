@@ -1,19 +1,26 @@
 <template>
   <div>
-
-    <input v-model="searchId" placeholder="建议用insure_process_id id ...">
-    <button @click="search">Search</button>
+    <!-- 添加环境选择的下拉框 -->
+    <select v-model="selectedEnvironment" @change="updateUrl()" class="select-environment">
+      <option value="QA环境">QA</option>
+      <option value="Staging环境">Staging</option>
+      <option value="Production环境">Production</option>
+    </select>
+    <input v-model="searchId" placeholder="建议用insure_process_id" class="input-searchId rounded-input">
+    <button  class="search-button" @click="search">Search</button>
     <!-- 搜索历史记录选择框 -->
-    <select @change="updateSearchId" >
-      <option  placeholder="最近的搜索记录" v-for="(id, index) in searchHistory" :key="index">{{ id }}</option>
+    <select @change="updateSearchId" class="rounded-input">
+      <option disabled selected value>最近的搜索记录</option>
+      <option v-for="(id, index) in searchHistory" :key="index">{{ id }}</option>
+<!--      <option placeholder="最近的搜索记录" v-for="(id, index) in searchHistory" :key="index">{{ id }}</option>-->
     </select>
     <div v-for="table in tables" :key="table.name">
       <div>
         <h3 @click="table.isCollapse = !table.isCollapse">{{ table.name }}
           <button @click.stop="table.isCollapse = !table.isCollapse">{{ table.isCollapse ? '展开' : '折叠' }}</button>
         </h3>
-        <div v-if="!table.isCollapse && table.data && Object.keys(table.data).length"  class="table-content" style="display: flex; flex-wrap: wrap;">
-          <div v-for="(value, key) in table.data" :key="key" style="flex: 1 1 25%;">
+        <div v-if="!table.isCollapse && table.data && Object.keys(table.data).length" class="table-content" style="display: flex; flex-direction: row; justify-content: center; align-items: flex-start; flex-wrap: wrap;">
+          <div v-for="(value, key) in table.data" :key="key" style="flex: 1 1 25%; display: flex; flex-direction: column; justify-content: flex-start; align-items: flex-start;">
             <div class="card" style="margin: 0.5em;">
               <div class="card-body">
                 <p class="card-text" :class="{ highlight: isHighlight(key) }" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0.5em; font-size: 0.9em;">
@@ -25,14 +32,14 @@
             </div>
           </div>
         </div>
-        <div v-else-if="!table.isCollapse && (!table.data || !Object.keys(table.data).length)">
+        <div v-else-if="!table.isCollapse">
           暂无数据
           <img :src="logoPath" alt="logoPath" style="width: 200px; height: auto;"/>
         </div>
       </div>
     </div>
-    <div v-if="isAllTablesEmpty">
-      暂无数据
+    <div class="no-data" v-if="isAllTablesEmpty">
+      New-Exectuor，搜你想要的！
       <img :src="logoPath"  alt="logoPath" style="width: 200px; height: auto;"/>
     </div>
     <div v-if="showDetailContent" class="details-popup">
@@ -41,7 +48,6 @@
     </div>
   </div>
 </template>
-
 
 <script>
 import axios from 'axios'
@@ -59,10 +65,23 @@ export default {
         left: '0px',
       },
       searchHistory: [],
+      // 新增的 data 属性
+      selectedEnvironment: 'QA环境', // 默认选择QA环境
+      requestUrl: 'http://localhost:8080/qa' ,// 根据选择的环境变化
       showDetailContent: null // add this to hold the value to show in the details popup
     }
   },
   methods: {
+    // 新增的 methods
+    updateUrl() {
+      if (this.selectedEnvironment === 'QA环境') {
+        this.requestUrl = 'http://localhost:8080/qa';
+      } else if (this.selectedEnvironment === 'Staging环境') {
+        this.requestUrl = 'http://localhost:8080/staging';
+      } else if (this.selectedEnvironment === 'Production环境') {
+        this.requestUrl = 'http://localhost:8080/production';
+      }
+    },
     async search() { // 添加 async 关键字，以便使用 await 关键字等待异步操作完成
       // 在发送请求前，将 searchId 添加到搜索历史
       this.searchHistory.unshift(this.searchId);
@@ -70,7 +89,7 @@ export default {
         this.searchHistory.pop(); // 如果搜索历史数组长度超过5，移除最老的记录
       }
       try {
-        const response = await axios.get(`http://localhost:8080/search/${this.searchId}`); // 使用 await 等待 API 响应
+        const response = await axios.get(`${this.requestUrl}/search/${this.searchId}`); // 使用 await 等待 API 响应
         if (response.data && response.data.AllTables) {
           // 更新整个表格数组
           this.tables = response.data.AllTables;
@@ -98,6 +117,7 @@ export default {
     dismissDetails() {
       this.showDetailContent = null;
     },
+
     isLongText(value) {
       if (typeof value === 'string') { // Directly check length if value is a string
         return value.length > 30;
@@ -161,5 +181,26 @@ export default {
 }
 .table-content {
   border: 1px solid black;
+}
+.rounded-input{
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  padding: 8px 20px;
+}
+.search-button {
+  background-color: aquamarine;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  padding: 8px 20px;
+}
+.select-environment {
+  width: 50px;  /* 调整到你需要的宽度 */
+  overflow: hidden;
+  background-color: aquamarine;
+
+}
+
+.input-searchId {
+  width: 300px;  /* 调整到你需要让所有内容都能显示的宽度 */
 }
 </style>
