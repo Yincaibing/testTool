@@ -1,4 +1,19 @@
-FROM ubuntu:latest
-LABEL authors="yincaibing"
-
-ENTRYPOINT ["top", "-b"]
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search-table-fe-app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: search-table-fe
+  template:
+    metadata:
+      labels:
+        app: search-table-fe
+    spec:
+      containers:
+        - name: search-table-fe
+          image: search-table-fe-image
+          ports:
+            - containerPort: 82

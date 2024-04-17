@@ -67,7 +67,7 @@ export default {
       searchHistory: [],
       // 新增的 data 属性
       selectedEnvironment: 'QA环境', // 默认选择QA环境
-      requestUrl: 'http://localhost:8080/qa' ,// 根据选择的环境变化
+      requestUrl: 'http://192.168.10.73:8090/qa' ,// 根据选择的环境变化
       showDetailContent: null // add this to hold the value to show in the details popup
     }
   },
@@ -75,11 +75,11 @@ export default {
     // 新增的 methods
     updateUrl() {
       if (this.selectedEnvironment === 'QA环境') {
-        this.requestUrl = 'http://localhost:8080/qa';
+        this.requestUrl = 'http://192.168.10.73:8090/qa';
       } else if (this.selectedEnvironment === 'Staging环境') {
-        this.requestUrl = 'http://localhost:8080/staging';
+        this.requestUrl = 'http://192.168.10.73:8090/staging';
       } else if (this.selectedEnvironment === 'Production环境') {
-        this.requestUrl = 'http://localhost:8080/production';
+        this.requestUrl = 'http://192.168.10.73:8090/production';
       }
     },
     async search() { // 添加 async 关键字，以便使用 await 关键字等待异步操作完成

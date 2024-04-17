@@ -1,4 +1,10 @@
-FROM ubuntu:latest
-LABEL authors="yincaibing"
-
-ENTRYPOINT ["top", "-b"]
+apiVersion: v1
+kind: Service
+metadata:
+  name: search-table-fe-app-service
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 82
+  selector:
+    app: search-table-fe-app
